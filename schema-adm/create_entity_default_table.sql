@@ -53,6 +53,21 @@ BEGIN
 	-- Excecute
 	--RAISE NOTICE 'l_sql: %', l_sql;
 	EXECUTE l_sql;
+
+	-- Fill md_table
+	DECLARE
+		l_md_table_id int;
+	BEGIN
+		INSERT INTO adm.md_table (
+			inner_name
+		) VALUES (
+			l_table_name
+		) RETURNING id INTO l_md_table_id;
+	
+		UPDATE adm.entity SET md_table_id = l_md_table_id
+		WHERE id = p_entity_id;
+	END;
+
 END;
 $procedure$
 ;
