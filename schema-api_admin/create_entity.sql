@@ -1,5 +1,5 @@
 CREATE OR REPLACE PROCEDURE api_admin.create_entity(IN p_public_name text, IN p_pascal_name text, IN p_is_doc boolean)
-LANGUAGE plpgsql
+ LANGUAGE plpgsql
 AS $procedure$
 DECLARE
 	l_table_name TEXT := convert_pascal_to_snake(p_pascal_name);
@@ -24,16 +24,20 @@ BEGIN
 		EXECUTE 'CREATE SCHEMA IF NOT EXISTS '||l_schema_name;
 	END;
 	
-	-- Create default entity
-	CALL adm.create_entity_default_table(l_entity_id);
-
-	-- Create triggers for object table
-	CALL adm.create_entity_log_trigger_bi(l_table_name);
-	CALL adm.create_entity_log_trigger_bu(l_table_name);
-
-	-- Fill entity columns
-	--CALL adm.fill_entity_columns(l_entity_id);
+	-- Create table and metadata
+	DECLARE
+		l_md_table_id int;
+	BEGIN
+		-- Create default entity
+		CALL adm.create_entity_default_table(l_md_table_id, l_entity_id);
+	
+		-- Create triggers for object table
+		CALL adm.create_entity_log_trigger_bi(l_table_name);
+		CALL adm.create_entity_log_trigger_bu(l_table_name);
+	
+		-- Fill md columns
+		CALL adm.fill_md_table_columns(l_md_table_id);
+	END;
 END;
 $procedure$
-;
 ;
