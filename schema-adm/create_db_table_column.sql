@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE adm.create_md_table_column(IN p_md_table_id integer, IN p_column_name text, IN p_data_type_id integer, IN p_is_nullable boolean, IN p_fk_table_id integer, IN p_description text)
+CREATE OR REPLACE PROCEDURE adm.create_db_table_column(IN p_md_table_id integer, IN p_column_name text, IN p_data_type_id integer, IN p_is_nullable boolean, IN p_fk_table_id integer, IN p_description text)
  LANGUAGE plpgsql
 AS $procedure$
 DECLARE
@@ -88,7 +88,7 @@ BEGIN
 	BEGIN
 		SELECT count(*)+1 INTO l_priority FROM adm.md_table t WHERE t.id = p_md_table_id;
 
-		INSERT INTO adm.md_table_column (
+		INSERT INTO adm.db_table_column (
 			inner_name, db_data_type_id, data_type, is_nullable, md_table_id, priority,
 			fk_table_id, is_updatable, description
 		) VALUES (

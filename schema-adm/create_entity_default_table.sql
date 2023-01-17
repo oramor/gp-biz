@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE adm.create_entity_default_table(OUT p_md_table_id integer, IN p_entity_id integer)
+CREATE OR REPLACE PROCEDURE adm.create_entity_default_table(OUT p_db_table_id integer, IN p_entity_id integer)
  LANGUAGE plpgsql
 AS $procedure$
 DECLARE
@@ -54,14 +54,14 @@ BEGIN
 	--RAISE NOTICE 'l_sql: %', l_sql;
 	EXECUTE l_sql;
 
-	-- Fill md_table
-	INSERT INTO adm.md_table (
+	-- Fill db_table
+	INSERT INTO adm.db_table (
 		inner_name
 	) VALUES (
 		l_table_name
-	) RETURNING id INTO p_md_table_id;
+	) RETURNING id INTO p_db_table_id;
 	
-	UPDATE adm.entity SET md_table_id = p_md_table_id
+	UPDATE adm.entity SET db_table_id = p_db_table_id
 	WHERE id = p_entity_id;
 END;
 $procedure$

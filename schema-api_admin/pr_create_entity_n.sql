@@ -30,17 +30,17 @@ BEGIN
 	
 	-- Create table and metadata
 	DECLARE
-		l_md_table_id int;
+		l_db_table_id int;
 	BEGIN
 		-- Create default entity
-		CALL adm.create_entity_default_table(l_md_table_id, p_entity_id);
+		CALL adm.create_entity_default_table(l_db_table_id, p_entity_id);
 	
 		-- Create triggers for object table
 		CALL adm.create_entity_log_trigger_bi(l_table_name);
 		CALL adm.create_entity_log_trigger_bu(l_table_name);
 	
 		-- Fill md columns
-		CALL adm.fill_md_table_columns(l_md_table_id);
+		CALL adm.fill_db_table_columns(l_db_table_id);
 	END;
 END;
 $procedure$

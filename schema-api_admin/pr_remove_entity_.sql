@@ -3,9 +3,9 @@ CREATE OR REPLACE PROCEDURE api_admin.pr_remove_entity_(IN p_entity_id integer)
 AS $procedure$
 DECLARE
 	l_entity_id int := req(p_entity_id);
-	l_md_table_id int;
+	l_db_table_id int;
 BEGIN
-	SELECT md_table_id INTO l_md_table_id FROM adm.entity WHERE id = l_entity_id;
+	SELECT db_table_id INTO l_db_table_id FROM adm.entity WHERE id = l_entity_id;
 	IF NOT FOUND THEN
 		RAISE EXCEPTION 'Not found entity with id %', l_entity_id;
 	END IF;
@@ -40,8 +40,8 @@ BEGIN
 	DELETE FROM entity WHERE id = l_entity_id;
 
 	-- Remove entity table metadata
-	DELETE FROM md_table_column c WHERE c.md_table_id = l_md_table_id;
-	DELETE FROM md_table WHERE id = l_md_table_id;
+	DELETE FROM db_table_column c WHERE c.db_table_id = l_db_table_id;
+	DELETE FROM db_table WHERE id = l_db_table_id;
 END;
 $procedure$
 ;
