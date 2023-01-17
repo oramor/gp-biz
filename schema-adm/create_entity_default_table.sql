@@ -37,10 +37,10 @@ BEGIN
 	-- Specify doc columns
 	IF l_is_doc THEN
 		l_sql := l_sql||br(1)||
-		'	doc_number text NOT NULL DEFAULT now(),'||br(1)||
+		'	doc_number text,'||br(1)||
 		'	doc_date timestamptz NOT NULL DEFAULT now(),'||br(1)||
 		'	tax_date timestamptz NOT NULL DEFAULT now(),'||br(1)||
-		'	is_commited bool,';
+		'	is_commited bool NOT NULL DEFAULT false,';
 	END IF;
 
 	-- Public name
