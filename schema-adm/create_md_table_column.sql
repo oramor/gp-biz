@@ -12,7 +12,7 @@ BEGIN
 	END IF;
 
 	-- Get data type
-	SELECT t.inner_name INTO l_data_type_txt FROM supported_data_type t WHERE id = p_data_type_id;
+	SELECT t.inner_name INTO l_data_type_txt FROM db_data_type t WHERE id = p_data_type_id;
 	IF NOT FOUND THEN
 		RAISE EXCEPTION 'Not found supported data type with id %', p_data_type_id;
 	END IF;
@@ -89,7 +89,7 @@ BEGIN
 		SELECT count(*)+1 INTO l_priority FROM adm.md_table t WHERE t.id = p_md_table_id;
 
 		INSERT INTO adm.md_table_column (
-			inner_name, supported_data_type_id, data_type, is_nullable, md_table_id, priority,
+			inner_name, db_data_type_id, data_type, is_nullable, md_table_id, priority,
 			fk_table_id, is_updatable, description
 		) VALUES (
 			l_column_name, p_data_type_id, l_data_type_txt, p_is_nullable, p_md_table_id, l_priority,
