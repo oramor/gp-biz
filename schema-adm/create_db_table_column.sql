@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE adm.create_db_table_column(OUT p_column_id int, IN p_db_table_id integer, IN p_column_name text, IN p_logical_data_type integer, IN p_is_nullable boolean, IN p_is_updatable boolean, IN p_is_required boolean, IN p_description text)
+CREATE OR REPLACE PROCEDURE adm.create_db_table_column(OUT p_column_id integer, IN p_db_table_id integer, IN p_column_name text, IN p_logical_data_type integer, IN p_is_nullable boolean, IN p_is_updatable boolean, IN p_is_required boolean, IN p_description text)
  LANGUAGE plpgsql
 AS $procedure$
 DECLARE
@@ -84,7 +84,9 @@ BEGIN
 	DECLARE
 		l_priority int;
 	BEGIN
-		SELECT count(*)+1 INTO l_priority FROM adm.db_table t WHERE t.id = p_db_table_id;
+		/* Дефолтный приоритет колонки вычисляем не по количеству строк, а по максимальному значению
+		 * Потому что какой смысл, например, добавлять 7, если у всех 6 колонок priority = 1 */ 
+		SELECT max(t.priority)+1 INTO l_priority FROM adm.db_table_column t WHERE t.db_data_type_id = p_db_table_id;
 
 		INSERT INTO adm.db_table_column (
 			inner_name, db_data_type_id, data_type, is_nullable, db_table_id, priority,

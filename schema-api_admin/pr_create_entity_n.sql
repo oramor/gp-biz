@@ -6,26 +6,27 @@ DECLARE
 	l_public_name TEXT := parse_text_req(p_obj, 'publicName');
 	l_is_doc bool := parse_bool_req(p_obj, 'isDocument');
 	l_table_name TEXT;
+	l_db_schema_id int;
 BEGIN
 	l_table_name := convert_pascal_to_snake(l_pascal_name);
 	
+	-- Create API schema
+	DECLARE
+		l_schema_name TEXT := concat('biz_', l_table_name);
+	BEGIN
+		CALL create_db_schema(l_db_schema_id, l_schema_name);
+	END;
+
 	-- Try to add new entity
 	BEGIN 
 		INSERT INTO adm.entity (
-			public_name, pascal_name, is_document 
+			public_name, pascal_name, is_document, db_schema_id 
 		) VALUES (
-			l_public_name, l_pascal_name, l_is_doc
+			l_public_name, l_pascal_name, l_is_doc, l_db_schema_id
 		) RETURNING id INTO p_entity_id;
 	EXCEPTION
 		WHEN unique_violation THEN
 			RAISE EXCEPTION 'Entity with name % has already exist', l_pascal_name;
-	END;
-
-	-- Create API schema
-	DECLARE
-		l_schema_name TEXT := concat('api_', l_table_name);
-	BEGIN
-		EXECUTE 'CREATE SCHEMA IF NOT EXISTS '||l_schema_name;
 	END;
 	
 	-- Create table and metadata
@@ -39,8 +40,8 @@ BEGIN
 		CALL adm.create_entity_log_trigger_bi(l_table_name);
 		CALL adm.create_entity_log_trigger_bu(l_table_name);
 	
-		-- Fill md columns
-		CALL adm.fill_db_table_columns(l_db_table_id);
+		-- Fill db columns
+		CALL adm.fill_entity_default_table(l_db_table_id);
 	END;
 END;
 $procedure$
