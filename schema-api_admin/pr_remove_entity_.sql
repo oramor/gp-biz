@@ -44,26 +44,25 @@ BEGIN
 	-- Remove entity metadata
 	DELETE FROM entity WHERE id = l_entity_id;
 
-	-- Remove view pattern columns which have refs to db_table_column
---	FOR r_table_column IN SELECT * FROM db_table_column t WHERE t.db_table_id = l_db_table_id
---	LOOP 
---		DELETE FROM abstract_view_column v WHERE v.db_table_column_id = r_table_column.id;
---	END LOOP;
-	
-	/* Remove all views metadata which depends on view patterns (before this view patterns will
-	 * be dropped. At current moment database views have benn already dropped with entity schema */ 
-	--DELETE FROM db_view v WHERE v.id IN (SELECT db_view_id FROM abstract_view t WHERE t.db_view_id = v.id);
-
 	-- Remove all routines metadata which refs to entity schema
 	DELETE FROM db_routine t WHERE t.db_schema_id = l_schema_id;
 	
-	-- Remove all view patterns which refs to entity db table
-	--DELETE FROM abstract_view t WHERE t.db_table_id = l_db_table_id;
-
 	-- Remove schema (past because db_routines and views have ref to)
 	DELETE FROM db_schema WHERE id = l_schema_id;
 
-	-- Remove entity table metadata, columns and aliases
+	-- Remove gui views for entity db_table
+	DECLARE
+		r_view record;
+	BEGIN
+		FOR r_view IN SELECT * FROM gui_view v WHERE v.db_table_id = l_db_table_id
+		LOOP 
+			-- At first remove columns, then view
+			DELETE FROM gui_view_column c WHERE c.gui_view_id = r_view.id;
+			DELETE FROM gui_view v WHERE v.id = r_view.id;
+		END LOOP;
+	END;
+	
+	-- Remove entity db_table, columns and aliases
 	DELETE FROM db_table_column t WHERE t.db_table_id = l_db_table_id;
 	DELETE FROM db_table_alias t WHERE t.db_table_id = l_db_table_id;
 	DELETE FROM db_table WHERE id = l_db_table_id;
