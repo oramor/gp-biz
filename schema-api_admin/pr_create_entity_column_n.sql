@@ -22,8 +22,19 @@ BEGIN
 			RAISE EXCEPTION 'Did not resolve logical type by column name. Cast it explicitly.';
 		END IF;
 	END IF;
-	
-	CALL adm.create_db_table_column(p_id, l_db_table_id,l_column_name,l_logical_data_type_id,true,true,l_is_required,l_descr);
+
+	--CALL adm.create_db_table_column(p_id, l_db_table_id,l_column_name,l_logical_data_type_id,true,true,l_is_required,l_descr);
+
+	CALL adm.create_db_table_column(
+		p_id,
+		p_db_table_id => l_db_table_id,
+		p_column_name => l_column_name,
+		p_logical_data_type => l_logical_data_type_id,
+		p_is_nullable => TRUE,
+		p_is_updatable => TRUE,
+		p_is_required => l_is_required,
+		p_description => l_descr
+	);
 END;
 $procedure$
 ;

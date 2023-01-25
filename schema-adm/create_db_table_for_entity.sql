@@ -62,7 +62,9 @@ BEGIN
 
 	-- Fill db_table
 	DECLARE
-		l_sql TEXT;
+		l_abstract_column_id int;
+		l_is_for_join bool;
+		l_is_for_view bool;
 		l_logical_data_type_id int;
 		l_fk_table_id int;
 		r record;
@@ -76,15 +78,20 @@ BEGIN
 				CONTINUE;
 			END IF;
 		
-			/* Здесь тонкий момент. Колонки, которые добавляются в дефолтную таблицу, по определению
-			 * являются абстрактными, т.к. abstract_table_column, из которой они берутся (см блок выше),
+			/* Здесь тонкий момент. Все колонки, которые добавляются в дефолтную таблицу, являются
+			 * наследниками abstract_column, т.к. abstract_table_column, из которой они берутся (см блок выше),
 			 * это не более, чем связка abstract_table и abstract_column. По идее, функция
-			 * get_logical_data_type_id никогда не должна возвращать NULL */
-			l_logical_data_type_id := get_logical_data_type_id(r.column_name);
-			IF l_logical_data_type_id IS NULL THEN
+			 * get_abstract_column_id никогда не должна возвращать NULL */
+			l_abstract_column_id := get_abstract_column_id(r.column_name);
+			IF l_abstract_column_id IS NULL THEN
 				CONTINUE;
 			END IF;			
 			
+			-- Fill addition info from abstract columns
+			SELECT a.logical_data_type_id, a.is_for_join, a.is_for_view
+			INTO l_logical_data_type_id, l_is_for_join, l_is_for_view
+			FROM abstract_column a WHERE a.id = l_abstract_column_id;
+		
 			-- Здесь можно применить enum для логических типов
 			IF l_logical_data_type_id = 9 /*ForeignKey*/ THEN
 				/* Проверяем, действительно ли колонка является ссылочной. Имена таких колонок
@@ -101,10 +108,12 @@ BEGIN
 			-- All columns which adds with this cycle will be inherited from abstract_column
 			INSERT INTO db_table_column (
 				inner_name, data_type, db_data_type_id, is_nullable, db_table_id,
-				priority, logical_data_type_id, abstract_column_id
+				priority, logical_data_type_id, abstract_column_id,
+				is_for_join, is_for_view, camel_name
 			) VALUES (
 				r.column_name, r.udt_name, get_db_data_type_id(r.udt_name), (r.is_nullable)::bool, l_db_table_id,
-				r.ordinal_position, l_logical_data_type_id, get_abstract_column_id(r.column_name)
+				r.ordinal_position, l_logical_data_type_id, l_abstract_column_id,
+				l_is_for_join, l_is_for_view, aux.convert_snake_to_camel(inner_name)
 			);
 		END LOOP;
 	END;
